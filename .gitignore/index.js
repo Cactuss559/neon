@@ -9,8 +9,17 @@ const adapter = new FileSync('database.json');
 const db = low(adapter);
 const talkedRecently = new Set();
 const cooldown = new Set();
+const Cleverbot = require("cleverbot-node");
+const clbot = new Cleverbot;
+const shorten = require('isgd');
+const ms = require('parse-ms');
 bot.login(process.env.TOKEN);
 db.defaults({ histoires: [], xp: []}).write()
+
+bot.on('guildMemberAdd', member => {
+    var role = member.guild.roles.find('name', 'Membre');
+    member.addRole(role)
+})
 
 function play(connection, message) {
     var server = servers[message.guild.id];
@@ -38,6 +47,29 @@ bot.on('ready', () => {
     });
 });
 
+bot.on('guildMemberAdd', member => {
+    var bvn_embed = new Discord.RichEmbed()
+    .setColor('#E81414')
+    .addField("Bienvenue", `Bienvenue ${member.user.username} sur ${member.guild.name} nous somme actuellement ${member.guild.memberCount}`)
+    .setImage(member.user.displayAvatarURL)
+    .setFooter(`${member.user.username}`)
+    .setTimestamp()
+    member.guild.channels.find("name", "bienvenue-bye").send(bvn_embed)
+})
+
+
+var message = "message";
+
+if(message.content ==="@everyone") {
+    var emoji = bot.emojis.find("name", "ping")
+    message.react(emoji)
+}
+
+if(message.content ==="Neon") {
+    var emoji = bot.emojis.find("name", "ping")
+    message.react(emoji)
+    message.channel.send("Je suis occupé là laisse moi :rage:")
+}
 
 
 
@@ -117,7 +149,7 @@ bot.on('ready', () => {
         .addField(`🎡Divertissement`, "` \n/8ball \n/sondage-t \n/vcs`", true)
         .addField(`🖼Image`, "`/chat`", true)
         .addField(`🎶Musique`, "`Pas encore disponible`", true)
-        .addField("💼Utilitaire", "` /avatar \n/serveurlist \n/serveurinfo \n/botinfo \n/id \n/ping \n/invite \n/support`", true)
+        .addField("💼Utilitaire", "` /avatar \n/serveurlist \n/serveurinfo \n/botinfo \n/id \n/ping \n/invite \n/support \n/`", true)
         .addField(`📌Modération`, "` /ban \n/kick \n/clear`", true)
         .addField(`📍Administration`, "` /sondage \n/say`", true)
         .addField(`🏆Support`, "[[Clique ici pour accéder au support du Bot]](https://discord.gg/w3Fm94X)", true)
@@ -257,9 +289,6 @@ bot.on('ready', () => {
                    .setDescription(`Votre IDENTIFIANT/ID est ${message.author.id}`)
                message.channel.sendEmbed(idembed)
                break;
-           case "ping":
-               message.channel.sendMessage('Temp de latence avec le serveur: `' + `${message.createdTimestamp - Date.now()}` + ' ms`');
-               break;
            case "clear":
            if (message.member.hasPermission("MANAGE_MESSAGES")) {
                message.channel.fetchMessages()
@@ -279,7 +308,7 @@ bot.on('ready', () => {
                    .addField(`🏉Nombre d'utilisateur(s) au total sur les ${bot.guilds.size} serveur(s) ou je suis`, `${bot.users.size} utilisateur(s)`)
                    .addField("🎁Crée par", "[SLURATH](https://www.youtube.com/channel/UCSaZIP1CQvSjZP5gin90ALg)")
                    .addField("🎉Crée le", "28/12/2018")
-                   .addField("🎈Version", "1.0.0")
+                   .addField("🎈Version", "1.1.0")
                    .setColor("0x81DAF5")
                message.channel.sendEmbed(embedbot)
            break;
@@ -364,9 +393,6 @@ bot.on('ready', () => {
                 } catch(err) {
                     return message.channel.send(error.stack);
                 }
-            break;
-            case "serveurlist":
-               message.channel.send(bot.guilds.map(r => r.name + ` | **${r.memberCount}** membres`))
             break;
             case "tempsondage":
                 let argson = message.content.split(" ").slice(1);
